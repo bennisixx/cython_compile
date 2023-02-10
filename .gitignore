@@ -1,0 +1,9 @@
+bin/
+cython_output/
+cython_output/*/
+!**/.gitkeep
+*.pyc
+settings.json
+recents.json
+*logfile.log
+.vscode
