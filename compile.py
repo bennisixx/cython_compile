@@ -1,3 +1,4 @@
+# Import required libraries
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
@@ -7,22 +8,23 @@ import sys
 import json
 import traceback
 
+# Get the version of Python being used
 py_ver = sys.version.split('.')[0] + '.' + sys.version.split('.')[1]
 print(f"Python version used to compile: {py_ver}")
 
-build = False
-projects_available = []
+# Ask user if they want to compile the app with Cython
 run_compile = False
 if input('Compile app with Cython? (y/n)').lower() == 'y':
     run_compile = True
+
+# Ask user if they want to make an executable binary from compiled files
+build = False
 do_build_app = input('Make an executable binary from compiled files? (y/n)')
 if do_build_app.lower() == 'y':
     build = True
-print("Applications Available\n")
-app_id = 0
-d_apps = {}
 
 
+# List available projects from the applications directory
 def list_from_json():
     instructions = False
     if os.path.isdir("applications"):
@@ -45,20 +47,25 @@ def list_from_json():
         return None
 
 
+# Create the cython_output directory if it doesn't already exist
 if os.path.isdir("cython_output") is False:
     os.mkdir("cython_output")
 
-
+# Get the list of available projects
 projects_available = list_from_json()
 
 print("Choose Project ID Number: ")
 d_apps = projects_available
 try:
+    # Print the available projects for the user to choose from
     for k, v in d_apps.items():
         print(k, v)
 except Exception:
     print(traceback.format_exc())
+
 home = str(Path.home())
+
+# Get the project name from the user
 project_name = d_apps[str(input("Project ID: "))]
 ext_modules = []
 test_modules = []
@@ -67,10 +74,11 @@ if project_name in projects_available:
     print(f"Project name: {project_name}")
 
 
+# Prepare for building the app
 def prep_build():
     if os.path.isdir(f'{project_name}'):
         os.system(f'rm -Rf {project_name}')
-    os.mkdir(f'{project_name}')
+    # os.mkdir(f'{project_name}')
     os.system(f'cp -Rf applications/{project_name} ./')
     os.system(f'rm {project_name}/main.py')
     # move this file to parent
@@ -79,10 +87,12 @@ def prep_build():
     os.system(f'rm -Rf cython_output/{project_name}')
 
 
+# Remove unnecessary files from the app release folder
 def clean_release(cmd):
     os.system(cmd)
 
 
+# Get the name and path of the module to be built
 def get_module_data(f, sub_level_dirs):
     module_name = ''
     pathstr = ''
@@ -103,7 +113,7 @@ def get_module_data(f, sub_level_dirs):
 
 
 def build_modules():
-    top_level_dirs = [x[0] for x in os.walk(".") if 'pycache' not in x[0]]
+    top_level_dirs = [x[0] for x in os.walk(".") if 'pycache' not in x[0] and 'applications' not in x[0]]
     for d in top_level_dirs:
         sub_level_dirs = [xx[0] for xx in os.walk(d) if 'pycache' not in xx[0]]
         for f1 in os.listdir(sub_level_dirs[0]):
@@ -125,9 +135,9 @@ def build():
 
 def cleanup():  # cleanup app release folder
     appfile = ''
-    clean_release("find . -name '*.py' ! -name 'compile.py' -exec rm -Rf {} + ")
-    clean_release("find . -name '*__pycache__*' -exec rm -Rf {} + ")
-    clean_release("find . -name '*.c' -exec rm -Rf {} + ")
+    clean_release(f"find .{project_name} -name '*.py' ! -name 'compile.py' -exec rm -Rf {{}} + ")
+    clean_release(f"find .{project_name} -name '*__pycache__*' -exec rm -Rf {{}} + ")
+    clean_release(f"find .{project_name} -name '*.c' -exec rm -Rf {{}} + ")
     dirs = [fz[0] for fz in os.walk(".")]
     for d in dirs:
         if os.path.isdir(d):
@@ -212,9 +222,11 @@ if build:
     os.system(f"makeself/makeself.sh --nox11 --nocomp build/{project_name} dist/{project_name} '{project_name}' ./run.sh")
 
     os.system(f"""rm -Rf build/output/{project_name}""")
-
-    if os.path.isfile(f"bin/{project_name}"):
-        os.system(f"rm -Rf bin/{project_name}")
+    if os.path.isdir("bin"):
+        if os.path.isfile(f"bin/{project_name}"):
+            os.system(f"rm -Rf bin/{project_name}")
+    else:
+        os.system("mkdir bin")
     os.system(f"""cp dist/{project_name} bin/{project_name}""")
 
     os.system(f"rm -Rf {project_name}")
