@@ -25,26 +25,38 @@ if do_build_app.lower() == 'y':
 
 
 # List available projects from the applications directory
-def list_from_json():
-    instructions = False
-    if os.path.isdir("applications"):
-        if os.path.isfile("applications/config.json"):
-            with open("applications/config.json") as appslist:
-                res = json.load(appslist)
-                return res
-        else:
-            instructions = True
-    else:
-        instructions = True
-        os.mkdir('applications')
+# def list_from_json():
+#     instructions = False
+#     if os.path.isdir("applications"):
+#         if os.path.isfile("applications/config.json"):
+#             with open("applications/config.json") as appslist:
+#                 res = json.load(appslist)
+#                 return res
+#         else:
+#             instructions = True
+#     else:
+#         instructions = True
+#         os.mkdir('applications')
+#
+#     if instructions:
+#         print("Missing config.json file in applications directory")
+#         print("Creating file now. Add app root folder to applications directory and edit config.json")
+#         mkconf = {"1": "appname", "2": "another_appname"}
+#         with open('applications/config.json', 'w') as conf:
+#             json.dump(mkconf, conf)
+#         return None
 
-    if instructions:
-        print("Missing config.json file in applications directory")
-        print("Creating file now. Add app root folder to applications directory and edit config.json")
-        mkconf = {"1": "appname", "2": "another_appname"}
-        with open('applications/config.json', 'w') as conf:
-            json.dump(mkconf, conf)
-        return None
+
+def list_from_applications():
+    apps_avail = {}
+    app_key = 1
+    appdir = './applications'
+    for item in os.listdir(appdir):
+        if os.path.isdir(os.path.join(appdir, item)):
+            if "." not in item:
+                apps_avail[str(app_key)] = item
+                app_key += 1
+    return apps_avail
 
 
 # Create the cython_output directory if it doesn't already exist
@@ -52,14 +64,13 @@ if os.path.isdir("cython_output") is False:
     os.mkdir("cython_output")
 
 # Get the list of available projects
-projects_available = list_from_json()
+d_apps = list_from_applications()
 
 print("Choose Project ID Number: ")
-d_apps = projects_available
 try:
     # Print the available projects for the user to choose from
     for k, v in d_apps.items():
-        print(k, v)
+        print(f"{k}: ", v)
 except Exception:
     print(traceback.format_exc())
 
@@ -70,7 +81,7 @@ project_name = d_apps[str(input("Project ID: "))]
 ext_modules = []
 test_modules = []
 
-if project_name in projects_available:
+if project_name in d_apps:
     print(f"Project name: {project_name}")
 
 
