@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import sys
 import json
+import traceback
 
 py_ver = sys.version.split('.')[0] + '.' + sys.version.split('.')[1]
 print(f"Python version used to compile: {py_ver}")
@@ -23,17 +24,40 @@ d_apps = {}
 
 
 def list_from_json():
-    with open("../applications/config.json") as appslist:
-        res = json.load(appslist)
-        return res
+    instructions = False
+    if os.path.isdir("applications"):
+        if os.path.isfile("applications/config.json"):
+            with open("applications/config.json") as appslist:
+                res = json.load(appslist)
+                return res
+        else:
+            instructions = True
+    else:
+        instructions = True
+        os.mkdir('applications')
+
+    if instructions:
+        print("Missing config.json file in applications directory")
+        print("Creating file now. Add app root folder to applications directory and edit config.json")
+        mkconf = {"1": "appname", "2": "another_appname"}
+        with open('applications/config.json', 'w') as conf:
+            json.dump(mkconf, conf)
+        return None
+
+
+if os.path.isdir("cython_output") is False:
+    os.mkdir("cython_output")
+
 
 projects_available = list_from_json()
 
 print("Choose Project ID Number: ")
 d_apps = projects_available
-for k, v in d_apps.items():
-    print(k, v)
-
+try:
+    for k, v in d_apps.items():
+        print(k, v)
+except Exception:
+    print(traceback.format_exc())
 home = str(Path.home())
 project_name = d_apps[str(input("Project ID: "))]
 ext_modules = []
@@ -47,10 +71,10 @@ def prep_build():
     if os.path.isdir(f'{project_name}'):
         os.system(f'rm -Rf {project_name}')
     os.mkdir(f'{project_name}')
-    os.system(f'cp -Rf ../applications/{project_name} ./')
+    os.system(f'cp -Rf applications/{project_name} ./')
     os.system(f'rm {project_name}/main.py')
     # move this file to parent
-    os.system('cp compile.py ../applications/compile_backup.py')
+    os.system('cp compile.py applications/compile_backup.py')
     # remove old build
     os.system(f'rm -Rf cython_output/{project_name}')
 
@@ -157,7 +181,7 @@ if run_compile:
     clean_release(f"rm -rf {project_name}/.git {project_name}/.gitignore")
 
     # rename main to {project_name}
-    os.system(f"cp ../applications/{project_name}/main.py {project_name}/{project_name}.py")
+    os.system(f"cp applications/{project_name}/main.py {project_name}/{project_name}.py")
 
     # Build project modules and paths
     build_modules()
