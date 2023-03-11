@@ -9,16 +9,8 @@
 ### Usage
 
 - Clone the repository.
-- copy app root folder to ./applications
-- Edit the ./applications/config.json file to list your app root folders.
-The format for the config file is simple
-```json
-    {
-    "1": "another_app_directory_name",
-    "2": "another_app_directory_name",
-    ...
-}
-```
+- Add your application folder cython_compile/applications
+- cd cython_compile
 - Run either run.sh (python <= 3.10) or run_py311.sh (python 3.11)
 - Choose the project ID number from the list of available projects.
 - The system will compile the modules and produce the C extensions.
