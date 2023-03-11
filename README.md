@@ -1,7 +1,7 @@
 
 ## This is a build system that uses Cython to compile Python code into C extensions.
 
-### It supports compiling individual modules or an entire project. The system is built to use distutils and cython packages, and it includes the ability to create a binary executable from the compiled files using makeself.
+### It supports compiling individual modules or an entire project. The system is built to use distutils and cython packages, and it includes the ability to create a binary executable from the compiled files using the archive self extracting binary tool makeself.
 
 ## Requirements
 
